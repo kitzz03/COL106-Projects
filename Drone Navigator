@@ -1,0 +1,99 @@
+class Empty(Exception):
+    pass
+
+
+class Stack:
+
+    class Node:
+        def __init__(self, element, next):
+            self.element=element
+            self.next=next
+    
+    def __init__(self):
+        self.head=None
+        self.size=0
+    def __length__(self):
+        return self.size
+    def is_empty(self):
+        return self.size==0
+    def top(self):
+        if self.is_empty():
+            raise Empty('Stack is Empty')
+        return self.head.element
+    def pop(self):
+        if self.is_empty():
+            raise Empty('Stack is Empty')
+        answer=self.head.element
+        self.head=self.head.next
+        self.size-=1
+        return answer
+    def push(self,e):
+        self.head=self.Node(e,self.head)
+        self.size+=1
+
+
+stack=Stack()
+
+
+def findPositionandDistanceHelper():
+    x_coordinate = y_coordinate = z_coordinate = dist = 0
+
+    while(not stack.is_empty()):
+        ch = stack.pop() # O(1)
+
+        if ch=='X'or ch=='Y' or ch=='Z':
+            x = y = z = 0
+            direction=stack.pop() # O(1)
+            if direction=='+':
+                if ch=='X': # Check for positive movement in X-Direction
+                    x += 1
+                elif ch=='Y': # Check for positive movement in Y-Direction
+                    y += 1
+                elif ch=='Z': # Check for positive movement in Z-Direction
+                    z += 1
+            elif direction=='-':
+                if ch=='X': # Check for negative movement in X-Direction
+                    x -= 1
+                elif ch=='Y': # Check for negative movement in Y-Direction
+                    y -= 1
+                elif ch=='Z': # Check for negative movement in Z-Direction
+                    z -= 1
+            # All the if statements take constant time therefore time complexity of this 'if' statement is O(1)
+            ( x_coordinate , y_coordinate , z_coordinate , dist ) = ( x_coordinate + x , y_coordinate + y , z_coordinate + z , dist + 1 )
+        
+        elif ch==')':
+            ( p , q , r , d ) = findPositionandDistanceHelper() # Let time complexity be O(i) where 'i' is the length of instructions inside a bracket
+            ( x_coordinate , y_coordinate , z_coordinate , dist ) = ( x_coordinate + p , y_coordinate + q , z_coordinate + r , dist + d )
+        
+        elif ch=='(':
+            if stack.top().isdecimal():
+                # Following code identifies value of 'm' whenever m(P) is provided in instructions
+                mult=''
+                while(not stack.is_empty() and stack.top().isdecimal()):
+                    mult=stack.pop()+mult
+                
+                # Since the loop runs 'k' number of times where k = length of 'm'
+                # Therefore time complexity of this 'if' statement is O(len(m))
+                if len(mult)==0:
+                    multiplier=1
+                else:
+                    multiplier=int(mult)
+                return ( multiplier*x_coordinate , multiplier*y_coordinate , multiplier*z_coordinate , multiplier*dist )
+        
+    # In one execution of while loop time take is O(i) or O(len(m)) or O(1)
+    # Example: m(P)+P' will take time O( len(P) + len(m) + len(P') ) during len(P) times execution of O(1) 'if statement' in addition to single time execution
+    #          of O(len(m)) 'if statement' in addition to len(P') times execution of O(1) 'if statement'
+    #          So, total time is O(n) where n = len(P) + len(m) + len(P')
+    # Therefore time complexity of 'findPositionandDistanceHelper' function is O(n)      
+    return ( x_coordinate , y_coordinate , z_coordinate , dist )
+
+
+def findPositionandDistance(P):
+    for element in P:
+        stack.push(element)
+    
+    # 'n' times execution so O(n) where 'n' is length of drone program
+    ( x_coordinate , y_coordinate , z_coordinate , distance ) = findPositionandDistanceHelper() # O(n)
+
+    # So, time complexity of findPositionandDistance is O(n)
+    return [ x_coordinate , y_coordinate , z_coordinate , distance ]
